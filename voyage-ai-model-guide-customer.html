@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voyage AI · Model Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#04212c;
+  --ink-2:#0b3140;
+  --paper:#f2f5f4;
+  --panel:#ffffff;
+  --green:#00ed64;
+  --deepgreen:#00684a;
+  --teal:#0e7a6c;
+  --gold:#b97f1d;
+  --gold-bg:#fdf3df;
+  --coral:#c0392b;
+  --coral-bg:#fdeae7;
+  --muted:#5a6f76;
+  --hair:#dce4e1;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --disp:'Space Grotesk',sans-serif;
+  --body:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--body);background:var(--paper);color:var(--ink);font-size:15px;line-height:1.55}
+a{color:var(--deepgreen)}
+
+/* ---------- shell ---------- */
+.shell{display:flex;min-height:100vh}
+.rail{width:248px;flex-shrink:0;background:var(--ink);color:#cfe0e0;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:26px 0 18px}
+.rail .brand{padding:0 22px 20px;border-bottom:1px solid rgba(255,255,255,.12)}
+.brand .logo{font-family:var(--disp);font-weight:700;font-size:19px;color:#fff;letter-spacing:.2px}
+.brand .logo b{color:var(--green)}
+.brand .sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7fa0a4;margin-top:4px}
+.nav{flex:1;overflow-y:auto;padding:14px 12px}
+.nav button{display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;background:none;border:0;color:#aac4c6;font-family:var(--body);font-size:13.5px;font-weight:500;padding:9px 12px;border-radius:8px;cursor:pointer;transition:background .15s,color .15s}
+.nav button .num{font-family:var(--mono);font-size:10.5px;color:#5d7f86;width:18px;flex-shrink:0}
+.nav button:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav button.active{background:rgba(0,237,100,.12);color:#fff}
+.nav button.active .num{color:var(--green)}
+.rail .foot{padding:14px 22px 0;border-top:1px solid rgba(255,255,255,.12);font-size:11px;color:#6c8b90;line-height:1.6}
+.rail .foot code{font-family:var(--mono);font-size:10.5px;color:#9fc0c2}
+
+.main{flex:1;min-width:0;padding:38px 46px 90px;max-width:1180px}
+section.pane{display:none}
+section.pane.show{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ---------- typography ---------- */
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+h1{font-family:var(--disp);font-size:34px;font-weight:700;letter-spacing:-.5px;margin-bottom:10px}
+h2{font-family:var(--disp);font-size:21px;font-weight:600;margin:34px 0 12px}
+h3{font-family:var(--disp);font-size:16px;font-weight:600;margin:0 0 6px}
+.lede{font-size:16px;color:#33505a;max-width:78ch;margin-bottom:8px}
+.note{font-size:12.5px;color:var(--muted)}
+
+/* ---------- chips & tags ---------- */
+.m{font-family:var(--mono);font-size:.86em;font-weight:500;background:#e7efec;color:var(--ink);padding:1px 7px;border-radius:6px;white-space:nowrap}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;padding:3px 8px;border-radius:99px}
+.tag.flag{background:var(--green);color:#013a1e}
+.tag.active{background:#dff3e8;color:var(--deepgreen)}
+.tag.legacy{background:var(--gold-bg);color:var(--gold)}
+.tag.dep{background:var(--coral-bg);color:var(--coral)}
+.tag.open{background:#e3ecfb;color:#2b5aa6}
+.tag.cat{background:#eef1f0;color:#54707a}
+
+/* ---------- cards ---------- */
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.card{background:var(--panel);border:1px solid var(--hair);border-radius:14px;padding:18px 20px}
+.card.flagship{border:1.5px solid var(--green);box-shadow:0 4px 18px rgba(0,237,100,.10)}
+.card .head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+.card .name{font-family:var(--mono);font-size:15.5px;font-weight:600}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;font-size:12.5px;margin:10px 0}
+.kv dt{color:var(--muted)}
+.kv dd{font-weight:600}
+.list{font-size:13.5px;padding-left:18px;display:grid;gap:5px}
+.divider{border:0;border-top:1px solid var(--hair);margin:14px 0}
+
+/* ---------- stat strip ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:20px 0 6px}
+.stat{background:var(--panel);border:1px solid var(--hair);border-radius:12px;padding:14px 16px}
+.stat .v{font-family:var(--disp);font-size:24px;font-weight:700;color:var(--ink)}
+.stat .v em{font-style:normal;color:var(--deepgreen)}
+.stat .l{font-size:11.5px;color:var(--muted);margin-top:2px}
+
+/* ---------- tables ---------- */
+.tablewrap{overflow-x:auto;background:var(--panel);border:1px solid var(--hair);border-radius:14px}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:760px}
+th{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#587078;text-align:left;padding:11px 14px;border-bottom:1.5px solid var(--hair);background:#f7faf9;position:sticky;top:0}
+td{padding:10px 14px;border-bottom:1px solid #ecf1ef;vertical-align:top}
+tr:last-child td{border-bottom:0}
+tr.hl td{background:#f2fcf6}
+td .m{font-size:12px}
+.r{text-align:right;font-variant-numeric:tabular-nums}
+
+/* price gauge */
+.gauge{display:flex;align-items:center;gap:8px;min-width:130px}
+.gauge .bar{height:6px;border-radius:3px;background:linear-gradient(90deg,#0e7a6c,#00ed64)}
+.gauge .lab{font-family:var(--mono);font-size:11.5px;color:#33505a}
+
+/* ---------- RAG stack diagram ---------- */
+.stack{display:flex;flex-wrap:wrap;gap:0;align-items:stretch;margin:14px 0}
+.stack .step{background:var(--panel);border:1px solid var(--hair);border-radius:12px;padding:14px 16px;flex:1;min-width:170px}
+.stack .step.voy{border:1.5px solid var(--deepgreen);background:#f4fbf7}
+.stack .arrow{align-self:center;padding:0 8px;color:#9bb3b3;font-size:18px}
+.stack .step .who{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.stack .step.voy .who{color:var(--deepgreen)}
+.stack .step .what{font-weight:600;font-size:13.5px}
+.stack .step .ex{font-size:11.5px;color:var(--muted);margin-top:3px}
+
+/* ---------- use case navigator ---------- */
+.ucnav{background:var(--ink);border-radius:18px;padding:26px 28px;color:#d9e7e6;margin-top:18px}
+.ucnav h2{color:#fff;margin-top:0}
+.ucnav .prompt{font-size:13.5px;color:#9dbabb;margin-bottom:14px}
+.ucchips{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:18px}
+.ucchips button{font-family:var(--disp);font-weight:600;font-size:13.5px;background:rgba(255,255,255,.08);color:#cfe3e1;border:1px solid rgba(255,255,255,.16);border-radius:99px;padding:8px 16px;cursor:pointer;transition:all .15s}
+.ucchips button:hover{background:rgba(0,237,100,.16);color:#fff}
+.ucchips button.on{background:var(--green);color:#013a1e;border-color:var(--green)}
+.ucresult{background:#fff;color:var(--ink);border-radius:14px;padding:20px 22px;display:none}
+.ucresult.show{display:block;animation:fade .2s ease}
+.ucresult .pick{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:8px}
+.ucresult .pick .name{font-family:var(--mono);font-weight:600;font-size:17px}
+.ucresult .pair{font-size:13px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--hair)}
+.ucresult .why{font-size:13.5px;margin-top:6px}
+
+/* ---------- migration map ---------- */
+.mig{display:grid;gap:10px}
+.migrow{display:grid;grid-template-columns:1fr 36px 1fr 1.3fr;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--hair);border-radius:12px;padding:12px 16px;font-size:13px}
+.migrow .from{font-family:var(--mono);font-size:12.5px;color:#7a5a17}
+.migrow .to{font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--deepgreen)}
+.migrow .arr{text-align:center;color:#9bb3b3;font-size:16px}
+.migrow .why{color:#42606a;font-size:12.5px}
+
+/* benchmark bars */
+.bench{display:grid;gap:8px;margin:10px 0 4px}
+.bench .row{display:grid;grid-template-columns:230px 1fr 64px;align-items:center;gap:10px;font-size:12.5px}
+.bench .row .bl{font-family:var(--mono);font-size:11.5px;color:#3d5a64}
+.bench .row .track{background:#e8eeec;border-radius:4px;height:10px;overflow:hidden}
+.bench .row .fill{height:100%;border-radius:4px;background:var(--teal)}
+.bench .row.win .fill{background:var(--green)}
+.bench .row .val{font-family:var(--mono);font-size:11.5px;text-align:right;color:#33505a}
+
+.callout{border-left:3px solid var(--green);background:#f1faf4;border-radius:0 10px 10px 0;padding:12px 16px;font-size:13.5px;margin:14px 0}
+
+footer.src{margin-top:46px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--hair);padding-top:14px;line-height:1.7}
+
+@media(max-width:900px){
+  .shell{flex-direction:column}
+  .rail{width:100%;height:auto;position:static;flex-direction:column}
+  .nav{display:flex;flex-wrap:wrap;gap:4px}
+  .nav button{width:auto}
+  .main{padding:26px 18px 70px}
+  .migrow{grid-template-columns:1fr 24px 1fr}
+  .migrow .why{grid-column:1/-1}
+  .bench .row{grid-template-columns:1fr;gap:3px}
+  .bench .row .val{text-align:left}
+}
+@media print{.rail{display:none}section.pane{display:block!important;page-break-after:always}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ================= RAIL ================= -->
+<aside class="rail">
+  <div class="brand">
+    <div class="logo">Voyage<b>&nbsp;AI</b></div>
+    <div class="sub">Model Guide</div>
+  </div>
+  <nav class="nav" id="nav">
+    <button data-pane="overview" class="active"><span class="num">01</span>Overview</button>
+    <button data-pane="catalog"><span class="num">02</span>Model Catalog</button>
+    <button data-pane="cards"><span class="num">03</span>Model Cards</button>
+    <button data-pane="usecase"><span class="num">04</span>Find Your Model</button>
+    <button data-pane="rerank"><span class="num">05</span>Rerankers</button>
+    <button data-pane="bench"><span class="num">06</span>Benchmarks</button>
+    <button data-pane="migrate"><span class="num">07</span>Upgrade Guide</button>
+    <button data-pane="matrix"><span class="num">08</span>Comparison Matrix</button>
+  </nav>
+  <div class="foot">
+    Compiled from <code>docs.voyageai.com</code> and <code>blog.voyageai.com</code> · June 2026<br>For current pricing, see the official pricing page.
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- ================= 01 OVERVIEW ================= -->
+<section class="pane show" id="overview">
+  <div class="eyebrow">01 · Overview</div>
+  <h1>A practical guide to the Voyage AI model family</h1>
+  <p class="lede">Voyage AI (a MongoDB company) builds <strong>embedding models and rerankers</strong> — the two components that determine retrieval accuracy in semantic search, RAG, and agentic systems. This guide brings every model, benchmark, and recommendation from Voyage's documentation and blog into one place, so your team can choose the right model in minutes.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="v"><em>4</em></div><div class="l">product lines: text embeddings, contextualized chunk embeddings, multimodal embeddings, rerankers</div></div>
+    <div class="stat"><div class="v">+14.05%</div><div class="l">voyage-4-large vs. OpenAI v3 Large, avg. retrieval accuracy (RTEB, 29 datasets)</div></div>
+    <div class="stat"><div class="v">32K</div><div class="l">token context on all current models</div></div>
+    <div class="stat"><div class="v">200M</div><div class="l">free tokens per account on all current-generation models</div></div>
+  </div>
+
+  <h2>The four product categories</h2>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Text embeddings</h3>
+      <p style="font-size:13.5px">General-purpose vectorization for search and RAG. The <strong>Voyage 4 family</strong> (<span class="m">voyage-4-large</span>, <span class="m">voyage-4</span>, <span class="m">voyage-4-lite</span>, open-weight <span class="m">voyage-4-nano</span>) shares one embedding space — an industry first — so you can mix models between the query and document sides ("asymmetric retrieval") without ever re-indexing.</p>
+    </div>
+    <div class="card">
+      <h3>Domain-specific embeddings</h3>
+      <p style="font-size:13.5px"><span class="m">voyage-code-3</span> (code), <span class="m">voyage-finance-2</span> (finance), <span class="m">voyage-law-2</span> (legal). Embedding models are parameter-constrained by latency budgets, so dedicating capacity to one domain delivers outsized accuracy in that domain. Harvey, the legal AI platform, partnered with Voyage for custom legal embeddings.</p>
+    </div>
+    <div class="card">
+      <h3>Contextualized chunk &amp; multimodal embeddings</h3>
+      <p style="font-size:13.5px"><span class="m">voyage-context-3</span> embeds every chunk with awareness of the full document — replacing manual context-augmentation pipelines. <span class="m">voyage-multimodal-3.5</span> embeds interleaved text, images, PDF screenshots, and <strong>video</strong> through a single backbone, avoiding the "modality gap" that affects CLIP-style models.</p>
+    </div>
+    <div class="card">
+      <h3>Rerankers</h3>
+      <p style="font-size:13.5px">Cross-encoders that re-score your initial search results for a precision boost. <span class="m">rerank-2.5</span> and <span class="m">rerank-2.5-lite</span> add <strong>instruction following</strong>: steer relevance with natural language ("prioritize regulatory documents, not court cases").</p>
+    </div>
+  </div>
+
+  <h2>Where Voyage fits in your RAG stack</h2>
+  <p class="note" style="margin-bottom:6px">Voyage provides the two retrieval-quality stages. Everything else in your stack stays exactly as it is.</p>
+  <div class="stack">
+    <div class="step"><div class="who">Your data</div><div class="what">Docs, code, PDFs, video</div><div class="ex">Chunking / ingestion</div></div>
+    <div class="arrow">→</div>
+    <div class="step voy"><div class="who">Voyage</div><div class="what">Embedding model</div><div class="ex">voyage-4 family, context-3, multimodal-3.5, domain models</div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="who">Your choice</div><div class="what">Vector store</div><div class="ex">MongoDB Atlas, Milvus, Qdrant, Weaviate, Elastic…</div></div>
+    <div class="arrow">→</div>
+    <div class="step voy"><div class="who">Voyage</div><div class="what">Reranker</div><div class="ex">rerank-2.5 / 2.5-lite refine top-k</div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="who">Your choice</div><div class="what">Generative LLM</div><div class="ex">Grounded answer / agent action</div></div>
+  </div>
+  <div class="callout"><strong>Why it matters:</strong> retrieval quality — not the LLM — is usually the bottleneck in RAG accuracy and hallucination rate. Upgrading the embedding model and adding a reranker are drop-in API changes that lift the whole system without touching the rest of your stack.</div>
+
+  <h2>Platform &amp; cost facts worth knowing</h2>
+  <ul class="list">
+    <li><strong>Access:</strong> Voyage API, MongoDB Atlas Embedding &amp; Reranking API, GCP Vertex AI Model Garden, AWS Marketplace, Azure Managed Applications, and Snowflake. VPC deployment is supported for teams with data-residency requirements.</li>
+    <li><strong>Batch API:</strong> 33% discount versus standard endpoints with a 12-hour completion window — ideal for large initial ingestion jobs.</li>
+    <li><strong>Cost-efficiency features:</strong> Matryoshka embeddings (2048/1024/512/256 dimensions) plus quantization (float, int8, binary) can cut vector-database storage by up to ~99% with minimal accuracy loss.</li>
+    <li><strong>Free tier:</strong> the first 200M tokens are free on all current models (plus 150B pixels on multimodal models).</li>
+  </ul>
+</section>
+
+<!-- ================= 02 CATALOG ================= -->
+<section class="pane" id="catalog">
+  <div class="eyebrow">02 · Model Catalog</div>
+  <h1>Every model, one table</h1>
+  <p class="lede">All models across Voyage's docs and release history. <span class="tag flag">Flagship</span> = highest accuracy tier. <span class="tag legacy">Legacy</span> = still served, but superseded by a newer model. <span class="tag dep">Deprecated</span> = please migrate.</p>
+
+  <h2>Current generation</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Model</th><th>Released</th><th>Category</th><th>Context</th><th>Dimensions</th><th>Cost / 1M tokens</th><th>Performance profile</th><th>Primary strength · headline benchmark</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td><span class="m">voyage-4-large</span> <span class="tag flag">Flagship</span></td><td>Jan 15, 2026</td><td>Text embedding</td><td>32K</td><td>1024 default · 256/512/2048</td><td class="r">$0.12</td><td>Highest quality tier; MoE architecture keeps serving cost 40% below comparable dense models</td><td>State-of-the-art general/multilingual retrieval; tops RTEB; +14.05% vs OpenAI v3 Large, +8.20% vs Cohere Embed v4, +3.87% vs Gemini Embedding 001</td></tr>
+      <tr><td><span class="m">voyage-4</span></td><td>Jan 15, 2026</td><td>Text embedding</td><td>32K</td><td>1024 · 256/512/2048</td><td class="r">$0.06</td><td>Mid-size; balanced quality and cost</td><td>Approaches voyage-3-large quality at half the flagship price</td></tr>
+      <tr><td><span class="m">voyage-4-lite</span></td><td>Jan 15, 2026</td><td>Text embedding</td><td>32K</td><td>1024 · 256/512/2048</td><td class="r">$0.02</td><td>Latency/cost-optimized; highest throughput (1M tokens per request)</td><td>Approaches voyage-3.5 accuracy with far fewer parameters</td></tr>
+      <tr><td><span class="m">voyage-4-nano</span> <span class="tag open">Open weights</span></td><td>Jan 15, 2026</td><td>Text embedding</td><td>32K</td><td>1024 · 256/512/2048</td><td class="r">Free (Apache 2.0)</td><td>Local / self-hosted</td><td>Voyage's first open-weights model; shares the 4-series embedding space, giving local development an easy path to production</td></tr>
+      <tr><td><span class="m">voyage-context-3</span></td><td>Jul 23, 2025</td><td>Contextualized chunk embedding</td><td>32K</td><td>1024 · 256/512/2048</td><td class="r">$0.18</td><td>Single pass over the full document; drop-in replacement for standard embeddings</td><td>+14.24% chunk-level vs OpenAI-v3-large; +6.76% vs LLM-based contextual retrieval — without the augmentation pipeline</td></tr>
+      <tr><td><span class="m">voyage-multimodal-3.5</span></td><td>Jan 15, 2026</td><td>Multimodal embedding (text · image · video)</td><td>32K</td><td>1024 · 256/512/2048</td><td class="r">$0.12 + $0.60/B pixels</td><td>Single unified encoder for all modalities</td><td>+2.26% vs Cohere Embed v4 on visual docs; +4.65% vs Google Multimodal 001 on video at ~6x lower video cost; within 0.29% of voyage-3-large on pure text</td></tr>
+      <tr><td><span class="m">voyage-code-3</span></td><td>Dec 4, 2024</td><td>Domain: code</td><td>32K</td><td>1024 · 256/512/2048</td><td class="r">$0.18</td><td>Standard</td><td>+13.80% vs OpenAI-v3-large and +16.81% vs CodeSage-large across 32 code datasets; 300+ programming languages</td></tr>
+      <tr><td><span class="m">voyage-finance-2</span></td><td>Jun 3, 2024</td><td>Domain: finance</td><td>32K</td><td>1024</td><td class="r">$0.12</td><td>Standard</td><td>+7% vs OpenAI (next best), +12% vs Cohere across 11 finance datasets incl. FinanceBench, TAT-QA</td></tr>
+      <tr><td><span class="m">voyage-law-2</span></td><td>Apr 15, 2024</td><td>Domain: legal</td><td>16K</td><td>1024</td><td class="r">$0.12</td><td>Standard</td><td>#1 on MTEB legal retrieval at launch; +6% avg vs OpenAI v3 large over 8 legal datasets, &gt;10% on three</td></tr>
+      <tr><td><span class="m">rerank-2.5</span></td><td>Aug 11, 2025</td><td>Reranker</td><td>32K</td><td>—</td><td class="r">$0.05</td><td>Quality-optimized cross-encoder</td><td>+7.94% vs Cohere Rerank v3.5; +12.70% on the MAIR instruction benchmark; instructions add up to +11.48% accuracy</td></tr>
+      <tr><td><span class="m">rerank-2.5-lite</span></td><td>Aug 11, 2025</td><td>Reranker</td><td>32K</td><td>—</td><td class="r">$0.02</td><td>Latency-optimized</td><td>+7.16% vs Cohere Rerank v3.5; outperforms Qwen3-Reranker-8B while being over 10x smaller</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note" style="margin-top:8px">All current text/multimodal models support int8 and binary quantization plus Matryoshka dimensions. Free tier: first 200M tokens (plus 150B pixels on multimodal). Batch API: −33%.</p>
+
+  <h2>Legacy &amp; deprecated models</h2>
+  <p class="note" style="margin-bottom:10px">These remain available via the API, but Voyage's stated policy is that each new generation is strictly better — quality, context length, latency, and throughput. See the Upgrade Guide for the recommended path.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Model</th><th>Released</th><th>Category</th><th>Context</th><th>Dims</th><th>Cost / 1M</th><th>Status → replacement</th></tr></thead>
+    <tbody>
+      <tr><td><span class="m">voyage-3-large</span></td><td>Jan 7, 2025</td><td>Text</td><td>32K</td><td>1024 · 256–2048</td><td class="r">$0.18</td><td><span class="tag legacy">Legacy</span> → <span class="m">voyage-4-large</span> (better &amp; cheaper)</td></tr>
+      <tr><td><span class="m">voyage-3.5</span></td><td>May 20, 2025</td><td>Text</td><td>32K</td><td>1024 · 256–2048</td><td class="r">$0.06</td><td><span class="tag legacy">Legacy</span> → <span class="m">voyage-4</span></td></tr>
+      <tr><td><span class="m">voyage-3.5-lite</span></td><td>May 20, 2025</td><td>Text</td><td>32K</td><td>1024 · 256–2048</td><td class="r">$0.02</td><td><span class="tag legacy">Legacy</span> → <span class="m">voyage-4-lite</span></td></tr>
+      <tr><td><span class="m">voyage-3</span></td><td>Sep 18, 2024</td><td>Text</td><td>32K</td><td>1024</td><td class="r">$0.06</td><td><span class="tag legacy">Legacy</span> → <span class="m">voyage-4</span></td></tr>
+      <tr><td><span class="m">voyage-3-lite</span></td><td>Sep 18, 2024</td><td>Text</td><td>32K</td><td>512</td><td class="r">$0.02</td><td><span class="tag legacy">Legacy</span> → <span class="m">voyage-4-lite</span></td></tr>
+      <tr><td><span class="m">voyage-multimodal-3</span></td><td>Nov 12, 2024</td><td>Multimodal</td><td>32K</td><td>1024</td><td class="r">$0.12 + pixels</td><td><span class="tag legacy">Legacy</span> → <span class="m">voyage-multimodal-3.5</span></td></tr>
+      <tr><td><span class="m">voyage-02</span>, <span class="m">voyage-01</span>, <span class="m">voyage-lite-01</span>, <span class="m">voyage-lite-01-instruct</span>, <span class="m">voyage-lite-02-instruct</span></td><td>2023–24</td><td>Text (v1/v2 pilots)</td><td>4K</td><td>1024</td><td class="r">$0.10</td><td><span class="tag dep">Deprecated</span> → Voyage 4 series</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ================= 03 MODEL CARDS ================= -->
+<section class="pane" id="cards">
+  <div class="eyebrow">03 · Model-by-Model Breakdown</div>
+  <h1>Model cards</h1>
+  <p class="lede">A closer look at each current model — what it is, what makes it different, who it fits, and the honest considerations to weigh before choosing it.</p>
+
+  <div class="grid g2" style="margin-top:18px">
+
+    <div class="card flagship">
+      <div class="head"><div class="name">voyage-4-large</div><div><span class="tag flag">Flagship</span> <span class="tag cat">Text</span></div></div>
+      <p style="font-size:13.5px"><strong>Overview.</strong> The first production-grade <em>mixture-of-experts</em> embedding model. The current state of the art for general-purpose and multilingual retrieval; it tops the RTEB leaderboard and supersedes voyage-3-large at a lower price ($0.12 vs $0.18 per 1M tokens).</p>
+      <dl class="kv"><dt>What's different</dt><dd>MoE architecture (40% lower serving cost vs comparable dense models); shared 4-series embedding space; 32K context; Matryoshka dimensions + binary/int8 quantization</dd>
+      <dt>Best fit</dt><dd>Teams that put accuracy first: enterprise knowledge bases, premium search products, agent memory at scale</dd>
+      <dt>Example workloads</dt><dd>High-fidelity document indexing, multilingual enterprise search, context-engineered agents</dd></dl>
+      <p style="font-size:13px"><strong>Why it stands out.</strong> +14.05% over OpenAI v3 Large and +8.20% over Cohere Embed v4 on 29 RTEB datasets — and documents indexed with it can be queried by cheaper 4-series models (asymmetric retrieval), so flagship-grade indexing doesn't commit you to flagship query costs.</p>
+      <p class="note"><strong>Considerations.</strong> Twice the price of voyage-4. If cost is the priority, start with voyage-4-lite queries over a voyage-4-large index.</p>
+    </div>
+
+    <div class="card">
+      <div class="head"><div class="name">voyage-4 &amp; voyage-4-lite</div><div><span class="tag active">Active</span> <span class="tag cat">Text</span></div></div>
+      <p style="font-size:13.5px"><strong>Overview.</strong> The mid and efficiency tiers of the 4 family. <span class="m">voyage-4</span> ($0.06/M) approaches voyage-3-large quality; <span class="m">voyage-4-lite</span> ($0.02/M) approaches voyage-3.5 quality at a fraction of the compute, with the highest per-request throughput (1M tokens).</p>
+      <dl class="kv"><dt>What's different</dt><dd>The same shared embedding space as the flagship — upgrade or downgrade your query model at any time without re-indexing</dd>
+      <dt>Best fit</dt><dd>High-QPS production search, cost-sensitive RAG, teams scaling from prototype to production</dd>
+      <dt>Example workloads</dt><dd>Query-side embedding for chatbots, agent shared-memory reads, log and ticket search</dd></dl>
+      <p style="font-size:13px"><strong>Why it stands out.</strong> Voyage's recommended pattern — index with 4-large, query with 4-lite — outperforms symmetric retrieval with small models across the board, while keeping per-query cost at the $0.02 tier.</p>
+      <p class="note"><strong>Considerations.</strong> Standalone (symmetric) accuracy trails 4-large by roughly 1.9–4.8% on average.</p>
+    </div>
+
+    <div class="card">
+      <div class="head"><div class="name">voyage-4-nano</div><div><span class="tag open">Open weights</span> <span class="tag cat">Text</span></div></div>
+      <p style="font-size:13.5px"><strong>Overview.</strong> Voyage's first open-weights model, available on Hugging Face under Apache 2.0 — and compatible with the entire 4-series embedding space.</p>
+      <dl class="kv"><dt>What's different</dt><dd>Free local inference that interoperates with the hosted 4-series models</dd>
+      <dt>Best fit</dt><dd>Local prototyping, air-gapped or edge experimentation, open-source-first teams</dd>
+      <dt>Example workloads</dt><dd>Local development → production handoff: prototype with nano, then serve queries on the same index with lite/4/large</dd></dl>
+      <p style="font-size:13px"><strong>Why it stands out.</strong> You can experiment completely offline and move to production without re-embedding anything — the vectors are compatible.</p>
+      <p class="note"><strong>Considerations.</strong> Lowest accuracy in the family; designed as the entry point rather than the production document indexer.</p>
+    </div>
+
+    <div class="card">
+      <div class="head"><div class="name">voyage-context-3</div><div><span class="tag active">Active</span> <span class="tag cat">Contextualized chunks</span></div></div>
+      <p style="font-size:13.5px"><strong>Overview.</strong> Contextualized chunk embeddings: the model reads the whole document in one pass and emits one vector per chunk that encodes both the chunk's detail and the document's global context — no metadata prepending, no LLM-generated context summaries.</p>
+      <dl class="kv"><dt>What's different</dt><dd>A drop-in replacement (same vector count and dimensions as standard embeddings, unlike ColBERT); reduces sensitivity to chunking strategy (2.06% variance vs 4.34% for voyage-3-large)</dd>
+      <dt>Best fit</dt><dd>Legal, financial, medical, and research teams working with long unstructured documents where missing context is costly</dd>
+      <dt>Example workloads</dt><dd>Contract clause retrieval ("which encryption does Client X require?"), 10-K analysis, white-paper RAG, queries that span multiple sections</dd></dl>
+      <p style="font-size:13px"><strong>Why it stands out.</strong> +14.24% chunk-level vs OpenAI-v3-large, and +6.76% over LLM-based contextual-retrieval pipelines while removing that entire engineering step. Binary-512 embeddings match OpenAI float-3072 quality at roughly 0.5% of the vector-database storage cost.</p>
+      <p class="note"><strong>Considerations.</strong> The highest text price ($0.18/M); documents must be submitted as ordered chunk sequences.</p>
+    </div>
+
+    <div class="card">
+      <div class="head"><div class="name">voyage-multimodal-3.5</div><div><span class="tag active">Active</span> <span class="tag cat">Multimodal</span></div></div>
+      <p style="font-size:13.5px"><strong>Overview.</strong> One encoder for interleaved text, images, screenshots, PDFs, tables, figures — and <strong>video frames</strong>. The first production-grade video embedding model with Matryoshka dimensions.</p>
+      <dl class="kv"><dt>What's different</dt><dd>A single-backbone architecture eliminates the CLIP "modality gap"; "screenshots are all you need" — no parsing, OCR, or layout-analysis pipeline</dd>
+      <dt>Best fit</dt><dd>Teams with visual-heavy corpora — slides, scanned PDFs, dashboards — or video libraries to make searchable</dd>
+      <dt>Example workloads</dt><dd>Text-to-video scene search, slide-deck retrieval, screenshot-based document RAG, mixed text+image knowledge bases</dd></dl>
+      <p style="font-size:13px"><strong>Why it stands out.</strong> Outperforms Cohere Embed v4 (+2.26%), Amazon Nova 2 (+8.38%), and Google Multimodal 001 (+30.57%) on visual document retrieval, and +4.65% over Google on video at ~6x lower cost — while staying within 0.29% of voyage-3-large on pure text, so one model can serve your whole corpus.</p>
+      <p class="note"><strong>Considerations.</strong> Pixel-based pricing is worth estimating up front for image/video-heavy corpora; long videos should be split into scenes of ≤32K tokens.</p>
+    </div>
+
+    <div class="card">
+      <div class="head"><div class="name">voyage-code-3</div><div><span class="tag active">Active</span> <span class="tag cat">Domain · Code</span></div></div>
+      <p style="font-size:13.5px"><strong>Overview.</strong> Voyage's purpose-built code retrieval model, widely adopted by code assistant and agent builders.</p>
+      <dl class="kv"><dt>What's different</dt><dd>Trained on trillions of tokens with docstring↔code and code↔code pairs across 300+ languages; 32K context (vs OpenAI's 8K and CodeSage's 1K); evaluated on a contamination-aware benchmark suite</dd>
+      <dt>Best fit</dt><dd>Code assistants, coding agents, internal monorepo search, developer tools</dd>
+      <dt>Example workloads</dt><dd>Text-to-code, code-to-code similarity, docstring-to-code, repository-scale semantic search</dd></dl>
+      <p style="font-size:13px"><strong>Why it stands out.</strong> +13.80% vs OpenAI-v3-large and +16.81% vs CodeSage-large over 32 code datasets; binary-256 embeddings still beat OpenAI float-3072 by 4.81% at 1/384 the storage.</p>
+      <p class="note"><strong>Considerations.</strong> Premium tier ($0.18/M). For mixed code+prose corpora, voyage-4-large is strong across domains — though code remains code-3's specialty.</p>
+    </div>
+
+    <div class="card">
+      <div class="head"><div class="name">voyage-finance-2</div><div><span class="tag active">Active</span> <span class="tag cat">Domain · Finance</span></div></div>
+      <p style="font-size:13.5px"><strong>Overview.</strong> Finance-tuned embeddings for filings, financial news, advice, and report QA — including hybrid tabular + text reasoning (TAT-QA-style data).</p>
+      <dl class="kv"><dt>What's different</dt><dd>32K context fits full filing sections; trained for numeric and tabular-text hybrids</dd>
+      <dt>Best fit</dt><dd>Fintech research tools, investment analytics, compliance search</dd>
+      <dt>Example workloads</dt><dd>10-K / FinanceBench-style QA, earnings-call retrieval, personal-finance assistants</dd></dl>
+      <p style="font-size:13px"><strong>Why it stands out.</strong> +7% over OpenAI (the next-best model) and +12% over Cohere across 11 finance datasets, none of which were seen during training.</p>
+      <p class="note"><strong>Considerations.</strong> Fixed 1024 dimensions without quantization options. voyage-4-large now matches or exceeds the series-2 domain models on their own domains, so it's worth benchmarking both on your data.</p>
+    </div>
+
+    <div class="card">
+      <div class="head"><div class="name">voyage-law-2</div><div><span class="tag active">Active</span> <span class="tag cat">Domain · Legal</span></div></div>
+      <p style="font-size:13.5px"><strong>Overview.</strong> Legal-tuned embeddings trained on roughly 1T additional legal tokens with an emphasis on long documents. Topped the MTEB legal-retrieval leaderboard at launch.</p>
+      <dl class="kv"><dt>What's different</dt><dd>Strong on multilingual case law (Chinese LeCaRDv2, German LegalQuAD/GerDaLIR); long-context retrieval improved across all domains, not just law</dd>
+      <dt>Best fit</dt><dd>Legal-tech platforms, law-firm knowledge systems, e-discovery, contract intelligence</dd>
+      <dt>Example workloads</dt><dd>Precedent retrieval, statute matching, contract QA</dd></dl>
+      <p style="font-size:13px"><strong>Why it stands out.</strong> +6% average over OpenAI v3 large on 8 legal datasets, and more than +10% on three of them — in a domain where retrieval misses are expensive.</p>
+      <p class="note"><strong>Considerations.</strong> 16K context (below the current 32K standard) and fixed 1024 dimensions. For new legal builds, it's worth benchmarking voyage-4-large and voyage-context-3 alongside it.</p>
+    </div>
+
+    <div class="card">
+      <div class="head"><div class="name">rerank-2.5</div><div><span class="tag active">Active</span> <span class="tag cat">Reranker</span></div></div>
+      <p style="font-size:13.5px"><strong>Overview.</strong> Voyage's quality-flagship cross-encoder, with first-in-family <strong>instruction following</strong> and a 32K context window (8x Cohere Rerank v3.5's).</p>
+      <dl class="kv"><dt>What's different</dt><dd>Steer relevance in natural language ("retrieve statutes, not case law"); distilled from larger in-house instruction-following models; outperforms LLM-as-reranker setups</dd>
+      <dt>Best fit</dt><dd>Any existing search stack — it layers on top of BM25, OpenAI, Cohere, or Voyage embeddings without migration</dd>
+      <dt>Example workloads</dt><dd>Precision boost on top-100 candidates, nuanced enterprise search, agent tool-result filtering</dd></dl>
+      <p style="font-size:13px"><strong>Why it stands out.</strong> +7.94% vs Cohere Rerank v3.5 across 93 datasets and +12.70% on MAIR; supplying instructions adds up to +11.48% on real-world datasets. In Voyage's published evaluation, it improved quality on top of every first-stage method tested.</p>
+      <p class="note"><strong>Considerations.</strong> Adds a serving hop (~$0.0025 per 100-document request) and cross-encoder latency — rerank only your top-k candidates.</p>
+    </div>
+
+    <div class="card">
+      <div class="head"><div class="name">rerank-2.5-lite</div><div><span class="tag active">Active</span> <span class="tag cat">Reranker</span></div></div>
+      <p style="font-size:13.5px"><strong>Overview.</strong> The latency-optimized sibling, with the same 32K context and instruction following at $0.02/M tokens.</p>
+      <dl class="kv"><dt>What's different</dt><dd>Outperforms the best open-source reranker (Qwen3-Reranker-8B) while being more than 10x smaller</dd>
+      <dt>Best fit</dt><dd>Latency-sensitive production search, high-QPS consumer applications, cost-optimized pipelines</dd>
+      <dt>Example workloads</dt><dd>Real-time search ranking, chatbot retrieval refinement at scale</dd></dl>
+      <p style="font-size:13px"><strong>Why it stands out.</strong> +7.16% vs Cohere Rerank v3.5 at roughly $0.001 per typical request — most of the flagship's lift at lite-tier latency and price.</p>
+      <p class="note"><strong>Considerations.</strong> Averages about 0.7–0.8 points behind rerank-2.5; choose 2.5 when accuracy matters more than latency.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= 04 FIND YOUR MODEL ================= -->
+<section class="pane" id="usecase">
+  <div class="eyebrow">04 · Find Your Model</div>
+  <h1>"Use this model if you need…"</h1>
+  <p class="lede">Pick the workload that best matches what you're building, and get the recommended primary model, pairing, and the reason — in one click.</p>
+
+  <div class="ucnav">
+    <h2>Workload navigator</h2>
+    <p class="prompt">What are you building?</p>
+    <div class="ucchips" id="ucchips"></div>
+    <div class="ucresult" id="ucresult"></div>
+  </div>
+
+  <h2>Decision shortcuts</h2>
+  <ul class="list">
+    <li><strong>Not sure which embedding model?</strong> → <span class="m">voyage-4-large</span> for your documents. Scale the query side with your budget: <span class="m">voyage-4-lite</span> → <span class="m">voyage-4</span> → <span class="m">voyage-4-large</span>, with no re-indexing required at any step.</li>
+    <li><strong>Should you add a reranker?</strong> → Yes, if precision@k matters: <span class="m">rerank-2.5</span> improved quality on top of <em>every</em> first-stage method in Voyage's evaluations, including BM25 and third-party embeddings.</li>
+    <li><strong>Domain models vs. voyage-4-large?</strong> → 4-large is the safest modern default across domains; <span class="m">voyage-code-3</span> remains the outright best for code, and the domain-2 models are worth benchmarking on legal and finance data.</li>
+    <li><strong>Worried about vector-database costs?</strong> → Matryoshka 512/256 dimensions + int8/binary quantization can reduce storage by up to ~99% while still exceeding OpenAI float-3072 quality.</li>
+  </ul>
+</section>
+
+<!-- ================= 05 RERANKERS ================= -->
+<section class="pane" id="rerank">
+  <div class="eyebrow">05 · Rerankers</div>
+  <h1>Rerankers: the simplest accuracy upgrade in RAG</h1>
+  <p class="lede">A reranker is a cross-encoder that scores query–document pairs jointly, refining the top results from any first-stage search (vector or BM25). It's the fastest way to lift an existing pipeline — no re-indexing, no migration, one additional API call.</p>
+
+  <h2>The lineup</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Model</th><th>Released</th><th>Context (query+doc)</th><th>Max query</th><th>Cost / 1M tokens</th><th>Est. per request*</th><th>Status</th><th>Headline</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td><span class="m">rerank-2.5</span></td><td>Aug 2025</td><td>32K</td><td>8K</td><td class="r">$0.05</td><td class="r">$0.0025</td><td><span class="tag flag">Flagship</span></td><td>+7.94% vs Cohere Rerank v3.5; instruction following; 8x Cohere's context</td></tr>
+      <tr class="hl"><td><span class="m">rerank-2.5-lite</span></td><td>Aug 2025</td><td>32K</td><td>8K</td><td class="r">$0.02</td><td class="r">$0.001</td><td><span class="tag active">Active</span></td><td>+7.16% vs Cohere v3.5; outperforms Qwen3-Reranker-8B at over 10x smaller</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note" style="margin-top:8px">*Assumes 100 documents, ~500 combined tokens per query-document pair. Reranker tokens = (query tokens × number of docs) + sum of document tokens. First 200M tokens free on the rerank-2.5 series.</p>
+
+  <h2>When a reranker makes sense</h2>
+  <div class="grid g3">
+    <div class="card"><h3>Precision@k is your metric</h3><p style="font-size:13px">Your LLM only sees the top 3–10 chunks. A reranker reorders the top ~100 candidates so the right ones make the cut — directly reducing hallucination.</p></div>
+    <div class="card"><h3>You can't touch the index</h3><p style="font-size:13px">Reranking layers on top of any existing stack — BM25, OpenAI, Cohere, or Voyage embeddings — with one API call. No re-embedding, no migration.</p></div>
+    <div class="card"><h3>Relevance is nuanced</h3><p style="font-size:13px">Instruction following (2.5 series) lets you encode business rules in plain language: prioritize titles, prefer regulatory documents, disambiguate "Jaguar" as the car brand.</p></div>
+  </div>
+
+  <h2>Measured advantage in RAG pipelines</h2>
+  <p class="note">Average NDCG@10 advantage of the rerank-2.5 series over Cohere Rerank v3.5, evaluated on top of four first-stage retrieval methods (93-dataset suite, Aug 2025 release).</p>
+  <div class="bench">
+    <div class="row win"><span class="bl">rerank-2.5 — MAIR (instructed retrieval)</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="val">+12.70%</span></div>
+    <div class="row win"><span class="bl">rerank-2.5-lite — MAIR</span><div class="track"><div class="fill" style="width:82%"></div></div><span class="val">+10.36%</span></div>
+    <div class="row win"><span class="bl">rerank-2.5 — standard retrieval</span><div class="track"><div class="fill" style="width:63%"></div></div><span class="val">+7.94%</span></div>
+    <div class="row win"><span class="bl">rerank-2.5-lite — standard retrieval</span><div class="track"><div class="fill" style="width:56%"></div></div><span class="val">+7.16%</span></div>
+  </div>
+  <div class="callout"><strong>A detail worth knowing:</strong> in Voyage's rerank-2.5 evaluation, the Voyage rerankers improved quality on top of all four first-stage methods tested — BM25, OpenAI v3-large, voyage-3-large, and voyage-3.5 — whereas not all rerankers on the market preserve quality when the first stage is already strong.</div>
+  <div class="callout"><strong>Versus prompting an LLM to rerank:</strong> Voyage's research position ("The Case Against LLMs as Rerankers," Oct 2025) is that purpose-built cross-encoders beat prompted LLMs on quality, latency, and cost — rerank-2.5-lite outperforms Qwen3-Reranker-8B while being over 10x smaller.</div>
+
+  <h2>Latency / cost tradeoffs &amp; recommended pairings</h2>
+  <div class="grid g2">
+    <div class="card">
+      <h3>How to think about the tradeoff</h3>
+      <ul class="list">
+        <li>Cross-encoders cost more compute per pair than vector lookup → rerank only your top 50–100 candidates.</li>
+        <li><span class="m">rerank-2.5</span>: choose when accuracy is paramount (legal, medical, finance, agent reliability).</li>
+        <li><span class="m">rerank-2.5-lite</span>: choose for user-facing latency budgets and high QPS — about 60% lower token price, with most of the lift.</li>
+        <li>The 32K context means long documents rerank without truncation.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Pairings that work well</h3>
+      <ul class="list">
+        <li><strong>Maximum accuracy:</strong> <span class="m">voyage-4-large</span> documents + <span class="m">rerank-2.5</span>. Voyage embeddings + Voyage rerankers is the highest-accuracy combination in Voyage's published evaluations.</li>
+        <li><strong>Cost-optimized:</strong> <span class="m">voyage-4-lite</span> queries (asymmetric over a 4-large index) + <span class="m">rerank-2.5-lite</span>.</li>
+        <li><strong>Incremental adoption:</strong> keep your current embeddings and add <span class="m">rerank-2.5</span> first — it's the lowest-effort, immediately measurable upgrade.</li>
+        <li><strong>Hybrid search:</strong> BM25 + vector union → rerank-2.5 as the unifying scorer.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 06 BENCHMARKS ================= -->
+<section class="pane" id="bench">
+  <div class="eyebrow">06 · Benchmarks</div>
+  <h1>Benchmark results at a glance</h1>
+  <p class="lede">Headline results from Voyage's published evaluations, grouped by benchmark family. All retrieval figures are NDCG@10 averages unless noted; each release blog links full per-dataset spreadsheets. The best benchmark, of course, is your own data — Voyage's free tier (200M tokens) is designed to make that evaluation easy.</p>
+
+  <h2>General-purpose retrieval (RTEB &amp; the 100-dataset suite)</h2>
+  <div class="card">
+    <p class="note" style="margin-bottom:8px">voyage-4-large, average advantage across 29 RTEB datasets (Jan 2026):</p>
+    <div class="bench">
+      <div class="row win"><span class="bl">vs OpenAI v3 Large</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="val">+14.05%</span></div>
+      <div class="row win"><span class="bl">vs Cohere Embed v4</span><div class="track"><div class="fill" style="width:58%"></div></div><span class="val">+8.20%</span></div>
+      <div class="row win"><span class="bl">vs Gemini Embedding 001</span><div class="track"><div class="fill" style="width:28%"></div></div><span class="val">+3.87%</span></div>
+      <div class="row win"><span class="bl">vs voyage-4 (own mid tier)</span><div class="track"><div class="fill" style="width:13%"></div></div><span class="val">+1.87%</span></div>
+    </div>
+    <hr class="divider">
+    <p class="note" style="margin-bottom:8px">Earlier generations vs OpenAI v3 Large (100 datasets, 8 domains):</p>
+    <div class="bench">
+      <div class="row"><span class="bl">voyage-3-large (Jan 2025)</span><div class="track"><div class="fill" style="width:69%"></div></div><span class="val">+9.74%</span></div>
+      <div class="row"><span class="bl">voyage-3.5 (May 2025)</span><div class="track"><div class="fill" style="width:59%"></div></div><span class="val">+8.26%</span></div>
+      <div class="row"><span class="bl">voyage-3.5-lite</span><div class="track"><div class="fill" style="width:45%"></div></div><span class="val">+6.34%</span></div>
+      <div class="row"><span class="bl">voyage-3 (Sep 2024)</span><div class="track"><div class="fill" style="width:40%"></div></div><span class="val">+5.60%</span></div>
+    </div>
+    <p class="note">Also published: voyage-3-large outperformed Cohere-v3-English by +20.71%; voyage-3.5 outperformed Cohere Embed v4 by +1.63%; voyage-3.5-lite landed within 0.3% of Cohere v4 at one sixth the cost.</p>
+  </div>
+
+  <h2>MTEB &amp; leaderboard history</h2>
+  <ul class="list">
+    <li><span class="m">voyage-law-2</span> topped the <strong>MTEB legal-retrieval leaderboard</strong> by a significant margin (Apr 2024).</li>
+    <li><span class="m">voyage-4-large</span> replaced voyage-3-large as the <strong>top model on the RTEB leaderboard</strong> (Hugging Face, Jan 2026) — RTEB being the newer retrieval-focused benchmark.</li>
+  </ul>
+
+  <h2>Domain-specific benchmarks</h2>
+  <div class="grid g2">
+    <div class="card"><h3>Code (32 datasets)</h3>
+      <div class="bench">
+        <div class="row win"><span class="bl">voyage-code-3 vs CodeSage-large</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="val">+16.81%</span></div>
+        <div class="row win"><span class="bl">voyage-code-3 vs OpenAI v3-large</span><div class="track"><div class="fill" style="width:82%"></div></div><span class="val">+13.80%</span></div>
+      </div>
+      <p class="note">92.28% NDCG@10 at 1024 dimensions vs OpenAI's 77.64%.</p></div>
+    <div class="card"><h3>Legal (8 MTEB datasets)</h3>
+      <div class="bench">
+        <div class="row win"><span class="bl">voyage-law-2 vs OpenAI v3-large (avg)</span><div class="track"><div class="fill" style="width:60%"></div></div><span class="val">+6%</span></div>
+        <div class="row win"><span class="bl">…on LeCaRDv2 / LegalQuAD / GerDaLIR</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="val">&gt;+10%</span></div>
+      </div>
+      <p class="note">Standout: LeCaRDv2 (Chinese case law) 72.75 vs OpenAI's 57.20.</p></div>
+    <div class="card"><h3>Finance (11 datasets)</h3>
+      <div class="bench">
+        <div class="row win"><span class="bl">voyage-finance-2 vs OpenAI (next best)</span><div class="track"><div class="fill" style="width:58%"></div></div><span class="val">+7%</span></div>
+        <div class="row win"><span class="bl">voyage-finance-2 vs Cohere</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="val">+12%</span></div>
+      </div>
+      <p class="note">Includes FinanceBench, TAT-QA (tabular+text), ConvFinQA, and FinQA — none seen during training.</p></div>
+    <div class="card"><h3>Contextualized chunks (93 datasets)</h3>
+      <div class="bench">
+        <div class="row win"><span class="bl">voyage-context-3 vs Jina-v3 late chunking</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="val">+23.66%</span></div>
+        <div class="row win"><span class="bl">vs OpenAI v3-large (chunk-level)</span><div class="track"><div class="fill" style="width:60%"></div></div><span class="val">+14.24%</span></div>
+        <div class="row win"><span class="bl">vs Cohere v4 (chunk-level)</span><div class="track"><div class="fill" style="width:53%"></div></div><span class="val">+12.56%</span></div>
+        <div class="row win"><span class="bl">vs LLM-based contextual retrieval</span><div class="track"><div class="fill" style="width:29%"></div></div><span class="val">+6.76%</span></div>
+      </div></div>
+  </div>
+
+  <h2>Multimodal &amp; video benchmarks</h2>
+  <div class="grid g2">
+    <div class="card"><h3>voyage-multimodal-3.5 (Jan 2026)</h3>
+      <div class="bench">
+        <div class="row win"><span class="bl">Visual docs vs Google Multimodal 001</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="val">+30.57%</span></div>
+        <div class="row win"><span class="bl">Visual docs vs Amazon Nova 2</span><div class="track"><div class="fill" style="width:27%"></div></div><span class="val">+8.38%</span></div>
+        <div class="row win"><span class="bl">Visual docs vs Cohere Embed v4</span><div class="track"><div class="fill" style="width:8%"></div></div><span class="val">+2.26%</span></div>
+        <div class="row win"><span class="bl">Video vs Google Multimodal 001</span><div class="track"><div class="fill" style="width:15%"></div></div><span class="val">+4.65%</span></div>
+      </div>
+      <p class="note">Benchmarks: ViDoRe, ViDoRe v2, MIRACL-VISION (visual documents); MSR-VTT, YouCook2, DiDeMo (video). Video embedding is also ~6x cheaper per 512×512 video than Google's. Pure text: within 0.29% of voyage-3-large.</p></div>
+    <div class="card"><h3>voyage-multimodal-3 (Nov 2024)</h3>
+      <div class="bench">
+        <div class="row win"><span class="bl">Table/figure retrieval vs OpenAI CLIP large</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="val">+41.44%</span></div>
+        <div class="row win"><span class="bl">Doc screenshots (ViDoRe) vs CLIP large</span><div class="track"><div class="fill" style="width:64%"></div></div><span class="val">+26.54%</span></div>
+        <div class="row win"><span class="bl">Avg vs next-best multimodal model</span><div class="track"><div class="fill" style="width:47%"></div></div><span class="val">+19.63%</span></div>
+      </div>
+      <p class="note">Key research finding: CLIP-style two-tower models suffer a "modality gap" — quality degrades as the screenshot ratio rises; Voyage's single-backbone architecture stays flat.</p></div>
+  </div>
+
+  <h2>Multilingual &amp; instruction-following (rerankers)</h2>
+  <ul class="list">
+    <li><strong>Multilingual reranking (51 datasets, 31 languages):</strong> rerank-2.5 outperforms Cohere Rerank v3.5 by +3.26% and Qwen3-Reranker-8B by +2.34% on multilingual averages; rerank-2.5-lite leads them by +1.93% and +1.01%, respectively.</li>
+    <li><strong>MAIR (Massive Instructed Retrieval):</strong> rerank-2.5 +12.70% and rerank-2.5-lite +10.36% over Cohere Rerank v3.5.</li>
+    <li><strong>Instruction lift:</strong> +8.13% (domain datasets) and +11.48% (real-world datasets) accuracy gain for rerank-2.5 when instructions are supplied.</li>
+    <li><strong>Multilingual embeddings:</strong> the Voyage 3/3.5/4 series are natively multilingual; voyage-3-large's 100-dataset suite includes 62 multilingual datasets across 26 languages.</li>
+  </ul>
+
+  <h2>Storage-cost results (the vector-database story)</h2>
+  <ul class="list">
+    <li><span class="m">voyage-3-large</span> binary-512 beat OpenAI float-3072 by +1.16% at <strong>1/200 the storage</strong> — the equivalent of a $20K monthly storage bill dropping to $100.</li>
+    <li><span class="m">voyage-context-3</span> binary-512 beat OpenAI float-3072 by +0.73% at <strong>roughly 0.5% of the storage cost</strong>; int8-2048 cuts costs 83% with +8.60% quality.</li>
+    <li><span class="m">voyage-code-3</span> binary-256 beat OpenAI float-3072 by +4.81% at <strong>1/384 the storage</strong>.</li>
+    <li>Binary rescoring (retrieve with binary embeddings, rescore with full precision) recovers up to ~6–7% additional quality across the 3.5 / 3-large / code-3 models.</li>
+  </ul>
+  <p class="note" style="margin-top:14px">All figures are from Voyage's published evaluations (NDCG@10, on the datasets and competitor model versions current at each release; full methodology and per-dataset spreadsheets are linked from each release blog post). Competitor models evolve — for production decisions, we recommend running the comparison on your own data.</p>
+</section>
+
+<!-- ================= 07 UPGRADE GUIDE ================= -->
+<section class="pane" id="migrate">
+  <div class="eyebrow">07 · Upgrade Guide</div>
+  <h1>On an older model? Here's the upgrade path</h1>
+  <p class="lede">Voyage's stated policy: each new generation is strictly better — quality, context length, latency, and throughput — and same-tier upgrades keep the same price. One note: switching embedding models normally requires re-embedding your corpus, <em>except</em> within the Voyage 4 shared embedding space, where models are interchangeable.</p>
+
+  <div class="mig" style="margin-top:18px">
+    <div class="migrow"><span class="from">voyage-3-large</span><span class="arr">→</span><span class="to">voyage-4-large</span><span class="why">Better accuracy at $0.12 vs $0.18; MoE serving; tops RTEB</span></div>
+    <div class="migrow"><span class="from">voyage-3.5 · voyage-3</span><span class="arr">→</span><span class="to">voyage-4</span><span class="why">Same $0.06 tier, near-3-large quality, joins the shared embedding space</span></div>
+    <div class="migrow"><span class="from">voyage-3.5-lite · voyage-3-lite</span><span class="arr">→</span><span class="to">voyage-4-lite</span><span class="why">Same $0.02 tier, higher accuracy, asymmetric-retrieval eligible</span></div>
+    <div class="migrow"><span class="from">voyage-multimodal-3</span><span class="arr">→</span><span class="to">voyage-multimodal-3.5</span><span class="why">Adds video, +3–5% quality, Matryoshka dimensions — same pricing</span></div>
+    <div class="migrow"><span class="from">voyage-02 · voyage-01 · voyage-lite-01 · voyage-lite-01-instruct · voyage-lite-02-instruct</span><span class="arr">→</span><span class="to">voyage-4 series</span><span class="why"><span class="tag dep">Deprecated</span> v1/v2 pilots — please migrate</span></div>
+  </div>
+
+  <div class="callout" style="margin-top:18px"><strong>Future-proofing:</strong> the Voyage 4 shared embedding space ends the "model upgrade = re-embed everything" cycle. If you index on voyage-4-large today, you can swap query models across the family — including the free open-weight nano — with zero migration. Reranker upgrades never require re-indexing at all.</div>
+
+  <h2>Practical migration tips</h2>
+  <ul class="list">
+    <li><strong>Re-embedding a large corpus?</strong> Use the Batch API for a 33% discount with a 12-hour completion window.</li>
+    <li><strong>Validate before switching:</strong> embed a representative sample with the new model and compare retrieval quality on your own queries — the 200M-token free tier typically covers this.</li>
+    <li><strong>Embeddings from different models (or generations) are not compatible</strong> — queries and documents must come from the same model, except within the Voyage 4 family.</li>
+  </ul>
+</section>
+
+<!-- ================= 08 MATRIX ================= -->
+<section class="pane" id="matrix">
+  <div class="eyebrow">08 · Quick Comparison Matrix</div>
+  <h1>All current models, side by side</h1>
+  <p class="lede">Price bars are scaled to $0.18/M (the top text tier). All models: first 200M tokens free; Batch API −33%; int8/binary quantization and 256–2048 Matryoshka dimensions unless noted.</p>
+
+  <div class="tablewrap" style="margin-top:14px">
+  <table>
+    <thead><tr><th>Model</th><th>Type</th><th>Context</th><th>Default dim</th><th>Price / 1M tokens</th><th>Quantization</th><th>Best for</th><th>Headline result</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td><span class="m">voyage-4-large</span> <span class="tag flag">★</span></td><td>Text</td><td>32K</td><td>1024</td><td><div class="gauge"><div class="bar" style="width:67px"></div><span class="lab">$0.12</span></div></td><td>float·int8·binary</td><td>Maximum-accuracy indexing &amp; retrieval</td><td>+14.05% vs OpenAI v3-L</td></tr>
+      <tr><td><span class="m">voyage-4</span></td><td>Text</td><td>32K</td><td>1024</td><td><div class="gauge"><div class="bar" style="width:33px"></div><span class="lab">$0.06</span></div></td><td>float·int8·binary</td><td>Balanced production RAG</td><td>≈ voyage-3-large quality</td></tr>
+      <tr><td><span class="m">voyage-4-lite</span></td><td>Text</td><td>32K</td><td>1024</td><td><div class="gauge"><div class="bar" style="width:11px"></div><span class="lab">$0.02</span></div></td><td>float·int8·binary</td><td>High-QPS queries, cost-optimized pipelines</td><td>≈ voyage-3.5 quality at lite cost</td></tr>
+      <tr><td><span class="m">voyage-4-nano</span></td><td>Text · open</td><td>32K</td><td>1024</td><td><div class="gauge"><div class="bar" style="width:2px"></div><span class="lab">Free</span></div></td><td>float·int8·binary</td><td>Local development, prototyping</td><td>Open weights, shared 4-space</td></tr>
+      <tr><td><span class="m">voyage-context-3</span></td><td>Contextualized chunks</td><td>32K</td><td>1024</td><td><div class="gauge"><div class="bar" style="width:100px"></div><span class="lab">$0.18</span></div></td><td>float·int8·binary</td><td>Long documents, cross-chunk reasoning</td><td>+14.24% vs OpenAI (chunk)</td></tr>
+      <tr><td><span class="m">voyage-multimodal-3.5</span></td><td>Text·image·video</td><td>32K</td><td>1024</td><td><div class="gauge"><div class="bar" style="width:67px"></div><span class="lab">$0.12 + px</span></div></td><td>float·int8·binary</td><td>Visual documents, video search</td><td>Outperforms Cohere v4 / Google MM 001</td></tr>
+      <tr><td><span class="m">voyage-code-3</span></td><td>Domain · code</td><td>32K</td><td>1024</td><td><div class="gauge"><div class="bar" style="width:100px"></div><span class="lab">$0.18</span></div></td><td>float·int8·binary</td><td>Code assistants &amp; agents</td><td>+13.80% vs OpenAI v3-L</td></tr>
+      <tr><td><span class="m">voyage-finance-2</span></td><td>Domain · finance</td><td>32K</td><td>1024 fixed</td><td><div class="gauge"><div class="bar" style="width:67px"></div><span class="lab">$0.12</span></div></td><td>float</td><td>Filings, finance QA</td><td>+7% vs OpenAI on finance</td></tr>
+      <tr><td><span class="m">voyage-law-2</span></td><td>Domain · legal</td><td>16K</td><td>1024 fixed</td><td><div class="gauge"><div class="bar" style="width:67px"></div><span class="lab">$0.12</span></div></td><td>float</td><td>Case law, contracts</td><td>#1 MTEB legal retrieval at launch</td></tr>
+      <tr><td><span class="m">rerank-2.5</span></td><td>Reranker</td><td>32K</td><td>—</td><td><div class="gauge"><div class="bar" style="width:28px"></div><span class="lab">$0.05</span></div></td><td>—</td><td>Precision lift, instruction steering</td><td>+7.94% vs Cohere Rerank v3.5</td></tr>
+      <tr><td><span class="m">rerank-2.5-lite</span></td><td>Reranker</td><td>32K</td><td>—</td><td><div class="gauge"><div class="bar" style="width:11px"></div><span class="lab">$0.02</span></div></td><td>—</td><td>Low-latency reranking</td><td>Outperforms Qwen3-Reranker-8B, 10x smaller</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>Getting started</h2>
+  <ul class="list">
+    <li><strong>Try it free:</strong> every current model includes 200M free tokens — enough to embed a substantial corpus and run a real evaluation. Quickstart: <a href="https://docs.voyageai.com/docs/quickstart-tutorial">docs.voyageai.com/docs/quickstart-tutorial</a></li>
+    <li><strong>Already on a cloud platform?</strong> Voyage models are available through MongoDB Atlas, GCP Vertex AI Model Garden, AWS Marketplace, Azure, and Snowflake — usable with existing cloud credits and infrastructure.</li>
+    <li><strong>Need a fine-tuned or custom model?</strong> Voyage offers fine-tuned models with dedicated instances — contact the Voyage team to discuss.</li>
+  </ul>
+
+  <footer class="src">
+    <strong>Sources.</strong> docs.voyageai.com (Text Embeddings, Multimodal Embeddings, Contextualized Chunk Embeddings, Rerankers, Pricing) and blog.voyageai.com release posts: Voyage 4 family, voyage-multimodal-3.5 &amp; expanded availability (Jan 2026), MoE deep-dive (Mar 2026), Batch API (Dec 2025), The Case Against LLMs as Rerankers (Oct 2025), rerank-2.5 (Aug 2025), voyage-context-3 (Jul 2025), voyage-3.5 (May 2025), voyage-3-large (Jan 2025), voyage-code-3 &amp; code-retrieval evaluation (Dec 2024), voyage-multimodal-3 (Nov 2024), voyage-3 (Sep 2024), Harvey partnership (Jul 2024), voyage-finance-2 (Jun 2024), voyage-law-2 (Apr 2024), launch announcements (Oct 2023). Benchmark figures are Voyage-published NDCG@10 evaluations at the time of each release. Pricing shown as of June 2026 — see <a href="https://docs.voyageai.com/docs/pricing">docs.voyageai.com/docs/pricing</a> for current rates.
+  </footer>
+</section>
+
+</main>
+</div>
+
+<script>
+/* ---------- tab navigation ---------- */
+const nav=document.getElementById('nav');
+nav.addEventListener('click',e=>{
+  const btn=e.target.closest('button');if(!btn)return;
+  nav.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('show'));
+  document.getElementById(btn.dataset.pane).classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+/* ---------- workload navigator ---------- */
+const UC=[
+ {k:'Search (general)',m:'voyage-4-large',tags:['Flagship'],
+  why:'The best general-purpose retrieval quality available (tops RTEB; +14.05% vs OpenAI v3 Large). Index your documents once at full fidelity.',
+  pair:'Pair with <b>rerank-2.5</b> for maximum precision, or query with <b>voyage-4 / voyage-4-lite</b> via the shared embedding space to keep serving costs down.'},
+ {k:'RAG pipelines',m:'voyage-4-large + rerank-2.5',tags:['Recommended stack'],
+  why:'Retrieval quality drives RAG answer quality and hallucination rate. Voyage embeddings + Voyage rerankers is the highest-accuracy published combination.',
+  pair:'Working with long, unstructured documents? Swap the embedder for <b>voyage-context-3</b> — chunk vectors that carry full-document context, +6.76% over LLM-based contextual retrieval.'},
+ {k:'Legal retrieval',m:'voyage-law-2',tags:['Domain'],
+  why:'#1 on MTEB legal retrieval at launch; +6% average over OpenAI v3 large, with >10% gains on Chinese and German case-law datasets.',
+  pair:'For long contracts and cross-clause queries, evaluate <b>voyage-context-3</b> head-to-head. Add <b>rerank-2.5</b> with instructions like “retrieve statutes, not case law.”'},
+ {k:'Financial retrieval',m:'voyage-finance-2',tags:['Domain'],
+  why:'+7% over OpenAI and +12% over Cohere across 11 finance datasets including FinanceBench and tabular-text TAT-QA. The 32K context fits filing sections whole.',
+  pair:'For 10-Ks and research reports with cross-section questions, consider <b>voyage-context-3</b>. Finish with <b>rerank-2.5</b> for precision on compliance-critical answers.'},
+ {k:'Code retrieval',m:'voyage-code-3',tags:['Domain'],
+  why:'The strongest Voyage model for code: +13.80% vs OpenAI-v3-large across 32 datasets, 300+ languages, and a 32K context that fits whole files.',
+  pair:'Monorepo-scale storage concern? Use binary-256 embeddings — they beat OpenAI float-3072 at 1/384 the storage. Pair with <b>rerank-2.5-lite</b> in IDE-latency paths.'},
+ {k:'Multimodal / video retrieval',m:'voyage-multimodal-3.5',tags:['Multimodal'],
+  why:'One encoder for interleaved text, screenshots, PDFs, tables, figures, and video. No OCR or parsing pipeline; no CLIP modality gap. ~6x cheaper than Google on video embedding.',
+  pair:'Pure-text quality is within 0.29% of voyage-3-large, so it can serve a mixed corpus on its own. Rerank text candidates with <b>rerank-2.5</b>.'},
+ {k:'Low-latency production',m:'voyage-4-lite (queries)',tags:['Asymmetric retrieval'],
+  why:'Embed documents once with voyage-4-large; serve queries with voyage-4-lite at $0.02/M with minimal latency. The shared embedding space gives you a flagship-grade index with lite-grade serving.',
+  pair:'Need a reranker in the hot path? <b>rerank-2.5-lite</b>: roughly $0.001 per 100-document request, with most of the flagship’s lift.'},
+ {k:'Cost-optimized pipelines',m:'voyage-4-lite + quantization',tags:['Efficiency'],
+  why:'$0.02/M embedding + Matryoshka 512/256 dimensions + int8/binary quantization: up to ~99% vector-database storage reduction while still beating OpenAI float-3072 quality. The Batch API adds a 33% discount.',
+  pair:'Keep accuracy headroom: index with <b>voyage-4-large</b> now and upgrade your query model later with zero re-indexing.'},
+ {k:'Multilingual search',m:'voyage-4-large',tags:['Multilingual'],
+  why:'The 3.5/4 generations are natively multilingual (evaluated on 60+ datasets across 26–31 languages). No separate multilingual model needed.',
+  pair:'Multilingual reranking: <b>rerank-2.5</b> outperforms Cohere Rerank v3.5 by +3.26% averaged across 31 languages.'},
+ {k:'Agent memory & context engineering',m:'Voyage 4 family',tags:['Agents'],
+  why:'Built for agents that read shared memory at high volume: 32K context, inexpensive high-throughput query embeddings, and a shared space so your memory index never needs re-embedding as you tune cost and quality.',
+  pair:'Filter retrieved tool results and memories with <b>rerank-2.5</b> instructions to encode your agent’s relevance policy in plain language.'},
+ {k:'Local development / open weights',m:'voyage-4-nano',tags:['Open weights'],
+  why:'Apache 2.0 on Hugging Face. Prototype locally for free, then point the same index at hosted 4-series models in production — the vectors are compatible.',
+  pair:'Production path: <b>voyage-4-large</b> documents, <b>voyage-4-lite</b> queries.'}
+];
+const chips=document.getElementById('ucchips'),res=document.getElementById('ucresult');
+UC.forEach((u,i)=>{
+  const b=document.createElement('button');b.textContent=u.k;b.dataset.i=i;chips.appendChild(b);
+});
+chips.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  chips.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  const u=UC[b.dataset.i];
+  res.innerHTML='<div class="pick"><span class="name">'+u.m+'</span>'+u.tags.map(t=>'<span class="tag flag">'+t+'</span>').join(' ')+'</div>'
+    +'<div class="why">'+u.why+'</div><div class="pair"><strong>Pairing:</strong> '+u.pair+'</div>';
+  res.classList.add('show');
+});
+/* preselect first */
+chips.querySelector('button').click();
+</script>
+</body>
+</html>
